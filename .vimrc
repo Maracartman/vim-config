@@ -13,7 +13,6 @@ set number
 set mouse=a
 set numberwidth=1
 set clipboard=unnamed
-syntax enable
 set showcmd
 set ruler
 set cursorline
@@ -29,41 +28,57 @@ set incsearch
 set ignorecase
 set smartcase
 set matchpairs+=<:>
+set matchpairs+=":"
+set matchpairs+=':'
 set splitright
 set splitbelow
-" Set status line display
-" set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ [BUFFER=%n]\ %{strftime('%c')}
+syntax enable
 syntax sync fromstart
+filetype plugin on
+" if hidden is not set, TextEdit might fail.
+set hidden " Some servers have issues with backup files, see #649 set nobackup set nowritebackup " Better display for messages set cmdheight=2 " You will have bad experience for diagnostic messages when it's default 4000.
+set updatetime=300
+
+" don't give |ins-completion-menu| messages.
+set shortmess+=c
+
+if has("nvim-0.5.0") || has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  " set signcolumn=number
+  set signcolumn=yes
+else
+  set signcolumn=yes
+endif
+
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
 autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
 
 call plug#begin('~/.vim/plugged')
-" Themes
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'ryanoasis/vim-devicons'
-" Plug 'morhetz/gruvbox'
-" Plug 'dikiaap/minimalist'
-" Plug 'dracula/vim', { 'as': 'dracula' }
-" Plug 'itchyny/lightline.vim' "Statusbar customization
+Plug 'morhetz/gruvbox'
+Plug 'arcticicestudio/nord-vim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'scrooloose/nerdtree'  " Display a tree index of the folder
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'scrooloose/nerdcommenter'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'easymotion/vim-easymotion' " Easy navegation in file
-Plug 'scrooloose/nerdtree'  " Display a tree index of the folder
+Plug 'airblade/vim-gitgutter'
 Plug 'christoomey/vim-tmux-navigator' " Navigator for open windows:
-
 Plug 'pangloss/vim-javascript' " JS Support
-Plug 'leafgarland/typescript-vim' "TS Support
-Plug 'peitalin/vim-jsx-typescript' 
+"Plug 'leafgarland/typescript-vim' "TS Support
+Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
+"Plug 'peitalin/vim-jsx-typescript' 
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'jparise/vim-graphql'
-Plug 'https://github.com/digitaltoad/vim-pug'
-Plug 'dNitro/vim-pug-complete', { 'for': ['jade', 'pug'] }
-
-
+Plug 'neoclide/jsonc.vim'
 call plug#end()
 
 " Vim Looking Conf <
@@ -79,56 +94,99 @@ let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '>'
-let g:airline_theme='murmur'
+let g:airline_theme='molokai'
 "Theme configuration
 " colorscheme minimalist
-" colorscheme gruvbox
+colorscheme gruvbox
 " colorscheme dracula
+"colorscheme nord
 
 " Vim Looking Conf >
-" Leader
-let mapleader=" "
+
 
 " Plug args conf <
 " NERDTree configurations
-let NERDTreeQuitOnOpen=0
+let NERDTreeQuitOnOpen=1
+let g:NERDTreeGitStatusWithFlags = 1
 let g:NERDTreeShowHidden = 1
 let g:NERDTreeMinimalUI = 1
-let g:NERDTreeIgnore = []
+let g:NERDTreeIgnore = ['^node_modules$']
 let g:NERDTreeStatusline = ''
+
+let g:NERDTreeGitStatusConcealBrackets = 1
+let g:NERDTreeGitStatusUseNerdFonts = 1
+let g:NERDTreeGitStatusIndicatorMapCustom = {
+                \ 'Modified'  :'✹',
+                \ 'Staged'    :'✚',
+                \ 'Untracked' :'✭',
+                \ 'Renamed'   :'➜',
+                \ 'Unmerged'  :'═',
+                \ 'Deleted'   :'✖',
+                \ 'Dirty'     :'✗',
+                \ 'Ignored'   :'☒',
+                \ 'Clean'     :'✔︎',
+                \ 'Unknown'   :'?',
+                \ }
+
 let g:fzf_action = {
   \ 'ctrl-t': 'tab split',
   \ 'ctrl-s': 'split',
   \ 'ctrl-v': 'vsplit'
   \}
+
 let g:gruvbox_contrast_dark = "dark"
 let g:webdevicons_enable_nerdtree = 1
 
 let g:coc_global_extensions = [
+  \ 'coc-pairs',
   \ 'coc-tsserver',
   \ 'coc-emmet',
   \ 'coc-css',
   \ 'coc-html',
+  \ 'coc-json'
   \ ]
+
 " Configure coc prettier or eslint depending of their existance in the folder
 if isdirectory('./node_modules') && isdirectory('./node_modules/prettier')
   let g:coc_global_extensions += ['coc-prettier']
-endif
-
-if isdirectory('./node_modules') && isdirectory('./node_modules/eslint')
+else
   let g:coc_global_extensions += ['coc-eslint']
 endif
-
 " Plug args conf >
 
+" Leader
+let mapleader=" "
+
 " Key mapping <
-nnoremap <silent> <C-b> :NERDTreeToggle<CR>
+"
+" INSERT MODE mapping
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+inoremap <silent><expr> <c-space> coc#refresh()
+
+"EXECUTION MODE mapping
+xmap <leader>f  <Plug>(coc-format-selected)
+" VIRTUAL MODE mapping
+vmap ++ <plug>NERDCommenterToggle
+" NORMAL MODE mapping
+nmap ++ <plug>NERDCommenterToggle
 nmap <Leader>nt :NERDTreeFind<CR>
 nmap <Leader>s <Plug>(easymotion-s2)
 nmap <Leader>w :w<CR>
 nmap <Leader>q :q<CR>
 nmap <Leader>wq :wq<CR>
-nnoremap <silent> <Leader>d :<C-u>CocList diagnostics<cr>
 nmap <C-P> :FZF<CR> 
 nmap <Leader>f :Rg<CR>
 nmap <Leader>gc :GFiles?<CR>
@@ -141,15 +199,30 @@ nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <leader>do <Plug>(coc-codeaction)
 nmap <leader>rn <Plug>(coc-rename)
+nmap <leader>f  <Plug>(coc-format-selected)
+nmap <F2> <Plug>(coc-rename)
+" nmap ]h <Plug>(GitGutterNextHunk)
+" nmap [h <Plug>(GitGutterPrevHunk)
 noremap <leader>gs :CocSearch
-nnoremap <silent> K :call CocAction('doHover')<CR>
-
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+nnoremap <silent> <C-c> :NERDTreeToggle<CR>
+nnoremap <silent> <Leader>d :<C-u>CocList diagnostics<cr>
 " turn terminal to normal mode with escape
+nnoremap <c-n> :call ToggleTerminal()<CR>
 tnoremap <Esc> <C-\><C-n>
-nnoremap <c-n> :call OpenTerminal()<CR>
+tnoremap <c-n>  <C-\><C-n>:call ToggleTerminal()<CR>
 " Key mapping >
 
 " Function definitions <
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+"TODO Delete this function
 " Show Coc Docs if no Diagnostic
 function! ShowDocIfNoDiagnostic(timer_id)
   if (coc#float#has_float() == 0 && CocHasProvider('hover') == 1)
@@ -157,6 +230,7 @@ function! ShowDocIfNoDiagnostic(timer_id)
   endif
 endfunction
 
+" TODO Delete this function
 function! s:show_hover_doc()
   call timer_start(500, 'ShowDocIfNoDiagnostic')
 endfunction
@@ -164,15 +238,51 @@ endfunction
 " Function definitions >
 
 " open terminal on ctrl+n
-function! OpenTerminal()
-  split term://zsh
-  resize 10
+function! ToggleTerminal()
+  let running = jobwait([&channel], 0)[0] == -1
+  if(!running)
+    split term://zsh
+    resize 10
+  else
+    quit
+  endif
 endfunction
+
+function! GitStatus()
+  let [a,m,r] = GitGutterGetHunkSummary()
+  return printf('+%d ~%d -%d', a, m, r)
+endfunction
+set statusline+=%{GitStatus()}
 
 " start terminal in insert mode
 au BufEnter * if &buftype == 'terminal' | :startinsert | endif
-autocmd CursorHoldI * :call <SID>show_hover_doc()
-autocmd CursorHold * :call <SID>show_hover_doc()
-" Automaticaly close nvim if NERDTree is only thing left open
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
+" NerdTree
+" sync open file with NERDTree
+" " Check if NERDTree is open or active
+function! IsNERDTreeOpen()        
+  return exists("t:NERDTreeBufName") && (bufwinnr(t:NERDTreeBufName) != -1)
+endfunction
+
+" Call NERDTreeFind iff NERDTree is active, current window contains a modifiable
+" file, and we're not in vimdiff
+function! SyncTree()
+  if &modifiable && IsNERDTreeOpen() && strlen(expand('%')) > 0 && !&diff
+    NERDTreeFind
+    wincmd p
+  endif
+endfunction
+
+" Highlight currently open buffer in NERDTree
+" autocmd BufEnter * call SyncTree() Fix problem with it
+autocmd BufEnter NERD_tree_* | execute 'normal R'
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+" TODO Delete this line
+" autocmd CursorHoldI * :call <SID>show_hover_doc()
+autocmd CursorHold * :call <SID>show_hover_doc()
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Treat all json files as jsonc
+augroup JsonToJsonc
+    autocmd! FileType json set filetype=jsonc
+augroup END
