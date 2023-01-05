@@ -8,6 +8,8 @@
 " NERDTreeNodePlug:
 " gt = go to next Tab
 " gT = go to previous Tab
+set nocompatible
+filetype off
 set t_Co=256
 set number
 set mouse=a
@@ -17,14 +19,15 @@ set showcmd
 set ruler
 set cursorline
 set encoding=utf-8
+set termencoding=utf-8
 set showmatch
 set sw=2
 set relativenumber
 set laststatus=2
 set noshowmode
 set hidden
-" Enable incremental search
 set incsearch
+set nohlsearch
 set ignorecase
 set smartcase
 set matchpairs+=<:>
@@ -32,9 +35,15 @@ set matchpairs+=":"
 set matchpairs+=':'
 set splitright
 set splitbelow
-syntax enable
+set autoindent
+set cindent
+set smartindent
+set shiftwidth=2
+set tabstop=2
+set softtabstop=2 " Number of spaces a tab counts when editing
+set expandtab
+set noswapfile
 syntax sync fromstart
-filetype plugin on
 " if hidden is not set, TextEdit might fail.
 set hidden " Some servers have issues with backup files, see #649 set nobackup set nowritebackup " Better display for messages set cmdheight=2 " You will have bad experience for diagnostic messages when it's default 4000.
 set updatetime=300
@@ -61,34 +70,40 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'ryanoasis/vim-devicons'
 Plug 'morhetz/gruvbox'
 Plug 'arcticicestudio/nord-vim'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+Plug 'christoomey/vim-tmux-navigator' " Navigator for open windows:
 Plug 'scrooloose/nerdtree'  " Display a tree index of the folder
-Plug 'Xuyuanp/nerdtree-git-plugin'
-Plug 'scrooloose/nerdcommenter'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'airblade/vim-gitgutter'
+
+Plug 'easymotion/vim-easymotion' " Easy navegation in file
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'easymotion/vim-easymotion' " Easy navegation in file
-Plug 'airblade/vim-gitgutter'
-Plug 'christoomey/vim-tmux-navigator' " Navigator for open windows:
+
+
+Plug 'scrooloose/nerdcommenter'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
 Plug 'pangloss/vim-javascript' " JS Support
-"Plug 'leafgarland/typescript-vim' "TS Support
-Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
-"Plug 'peitalin/vim-jsx-typescript' 
 Plug 'maxmellon/vim-jsx-pretty'
-Plug 'jparise/vim-graphql'
 Plug 'neoclide/jsonc.vim'
+Plug 'leafgarland/typescript-vim' "TS Support
+Plug 'jparise/vim-graphql'
+Plug 'styled-components/vim-styled-components'
+"Plug 'digitaltoad/vim-pug'
+"Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
+"Plug 'peitalin/vim-jsx-typescript' 
 call plug#end()
+filetype plugin on
 
 " Vim Looking Conf <
+syntax enable
+set background=dark
 if (has("termguicolors"))
  set termguicolors
 endif
-
-let g:lightline = {
-      \ 'colorscheme': 'powerline',
-      \ }
 
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
@@ -98,7 +113,7 @@ let g:airline_theme='molokai'
 "Theme configuration
 " colorscheme minimalist
 colorscheme gruvbox
-" colorscheme dracula
+"colorscheme dracula
 "colorscheme nord
 
 " Vim Looking Conf >
@@ -110,7 +125,7 @@ let NERDTreeQuitOnOpen=1
 let g:NERDTreeGitStatusWithFlags = 1
 let g:NERDTreeShowHidden = 1
 let g:NERDTreeMinimalUI = 1
-let g:NERDTreeIgnore = ['^node_modules$']
+"let g:NERDTreeIgnore = ['^node_modules$']
 let g:NERDTreeStatusline = ''
 
 let g:NERDTreeGitStatusConcealBrackets = 1
@@ -140,6 +155,7 @@ let g:webdevicons_enable_nerdtree = 1
 let g:coc_global_extensions = [
   \ 'coc-pairs',
   \ 'coc-tsserver',
+  \ 'coc-snippets',
   \ 'coc-emmet',
   \ 'coc-css',
   \ 'coc-html',
@@ -147,11 +163,12 @@ let g:coc_global_extensions = [
   \ ]
 
 " Configure coc prettier or eslint depending of their existance in the folder
-if isdirectory('./node_modules') && isdirectory('./node_modules/prettier')
-  let g:coc_global_extensions += ['coc-prettier']
-else
-  let g:coc_global_extensions += ['coc-eslint']
-endif
+"if isdirectory('./node_modules') && isdirectory('./node_modules/prettier')
+  "let g:coc_global_extensions += ['coc-prettier']
+"else 
+  "let g:coc_global_extensions += ['coc-eslint']
+"endif
+
 " Plug args conf >
 
 " Leader
@@ -196,7 +213,8 @@ nmap <silent> dy <Plug>(coc-type-definition)
 nmap <silent> gy <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> <Plug>(coc-diagnostic-next)
+nmap <silent><c-space> :CocAction<CR>
 nmap <leader>do <Plug>(coc-codeaction)
 nmap <leader>rn <Plug>(coc-rename)
 nmap <leader>f  <Plug>(coc-format-selected)
@@ -234,8 +252,6 @@ endfunction
 function! s:show_hover_doc()
   call timer_start(500, 'ShowDocIfNoDiagnostic')
 endfunction
-
-" Function definitions >
 
 " open terminal on ctrl+n
 function! ToggleTerminal()
@@ -278,7 +294,6 @@ endfunction
 autocmd BufEnter NERD_tree_* | execute 'normal R'
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " TODO Delete this line
-" autocmd CursorHoldI * :call <SID>show_hover_doc()
 autocmd CursorHold * :call <SID>show_hover_doc()
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
@@ -286,3 +301,23 @@ autocmd CursorHold * silent call CocActionAsync('highlight')
 augroup JsonToJsonc
     autocmd! FileType json set filetype=jsonc
 augroup END
+
+" Spellcheck for features and markdown
+au BufRead,BufNewFile *.md setlocal spell
+au BufRead,BufNewFile *.md.erb setlocal spell
+au BufRead,BufNewFile *.feature setlocal spell
+
+" Coc autocompletition config
+inoremap <silent><expr> <TAB>
+    \ coc#pum#visible() ? coc#_select_confirm() :
+    \ coc#expandableOrJumpable() ?
+    \ "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+    \ <SID>check_back_space() ? "\<TAB>" :
+    \ coc#refresh()
+
+  function! s:check_back_space() abort
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~# '\s'
+  endfunction
+
+  let g:coc_snippet_next = '<tab>'
