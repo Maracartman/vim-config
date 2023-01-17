@@ -72,8 +72,7 @@ Plug 'morhetz/gruvbox'
 Plug 'arcticicestudio/nord-vim'
 
 Plug 'christoomey/vim-tmux-navigator' " Navigator for open windows:
-Plug 'scrooloose/nerdtree'  " Display a tree index of the folder
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'scrooloose/nerdtree'  " Display a tree index of the folder Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'airblade/vim-gitgutter'
 
